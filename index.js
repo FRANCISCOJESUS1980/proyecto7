@@ -14,9 +14,8 @@ mongoose
   .then(() => console.log('Conectado a MongoDB Atlas'))
   .catch((err) => console.log(err))
 
-  app.use(/api/users, require("./routes/userRoutes"));
+  app.use(/api/users, require("./src/routes/userRoutes"));
 
-  app.listen(3000, () => {
-    console.log('Servidor levantado en: http://localhost:3000')
-  })
-  
+app.listen(3000, () => {
+  console.log('Servidor levantado en: http://localhost:3000')
+})
