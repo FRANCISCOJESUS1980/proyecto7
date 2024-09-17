@@ -3,7 +3,9 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 
 dotenv.config()
+
 const app = express()
+
 app.use(express.json())
 
 mongoose
@@ -12,6 +14,8 @@ mongoose
   .catch((err) => console.log(err))
 
 app.use('/api/users', require('./src/routes/userRoutes'))
+app.use('/api/posts', require('./src/routes/postRoutes'))
+app.use('/api/comments', require('./src/routes/commentRoutes'))
 
 app.use((req, res, next) => {
   const error = new Error('No encontrado')
