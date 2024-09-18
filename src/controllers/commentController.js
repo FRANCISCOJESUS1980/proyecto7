@@ -20,8 +20,8 @@ const createComment = async (req, res) => {
 const getCommentsByPost = async (req, res) => {
   try {
     const comments = await Comment.find({ post: req.params.postId })
-      .populate('user', 'username') // Traer información del autor
-      .populate('post', 'title') // Traer información del post
+      .populate('user', 'username')
+      .populate('post', 'title')
     res.json(comments)
   } catch (error) {
     res.status(500).json({ message: error.message })

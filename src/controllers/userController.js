@@ -6,70 +6,86 @@ dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET
 
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, JWT_SECRET, {
-    expiresIn: '5h'
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: '30d'
   })
 }
-
 const registerUser = async (req, res) => {
-  const { username, password } = req.body
-  const userExists = await User.findOne({ username })
+  try {
+    const { username, password } = req.body
+    const userExists = await User.findOne({ username })
 
-  if (userExists) {
-    return res.status(400).json({ message: 'El usuario ya existe' })
+    if (userExists) {
+      return res.status(400).json({ message: 'El usuario ya existe' })
+    }
+
+    const user = new User({ username, password })
+    await user.save()
+
+    res.status(201).json({
+      _id: user._id,
+      username: user.username,
+      token: generateToken(user._id)
+    })
+  } catch (error) {
+    res.status(500).json({ message: 'Error en el servidor' })
   }
-
-  const user = new User({ username, password })
-
-  await user.save()
-  res.status(201).json({
-    _id: user._id,
-    username: user.username,
-    token: generateToken(user._id)
-  })
 }
 
 const loginUser = async (req, res) => {
-  const { username, password } = req.body
-  const user = await User.findOne({ username })
+  try {
+    const { username, password } = req.body
+    const user = await User.findOne({ username })
 
-  if (user && (await user.comparePassword(password))) {
-    res.json({
-      _id: user._id,
-      username: user.username,
-      role: user.role,
-      token: generateToken(user._id)
-    })
-  } else {
-    res.status(401).json({ message: 'Credenciales incorrectas' })
+    if (user && (await user.comparePassword(password))) {
+      res.json({
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        token: generateToken(user._id)
+      })
+    } else {
+      res.status(401).json({ message: 'Credenciales incorrectas' })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error en el servidor' })
   }
 }
 
 const getUsers = async (req, res) => {
-  const users = await User.find()
-  res.json(users)
+  try {
+    const users = await User.find()
+    res.json(users)
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener los usuarios' })
+  }
 }
 
 const updateUser = async (req, res) => {
-  const user = await User.findById(req.params.id)
+  try {
+    const user = await User.findById(req.params.id)
 
-  if (user) {
-    user.role = req.body.role || user.role
-    await user.save()
-    res.json({ message: 'Usuario actualizado' })
-  } else {
-    res.status(404).json({ message: 'Usuario no encontrado' })
+    if (user) {
+      user.role = req.body.role || user.role
+      await user.save()
+      res.json({ message: 'Usuario actualizado' })
+    } else {
+      res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar el usuario' })
   }
 }
 
 const deleteUser = async (req, res) => {
-  const user = await User.findById(req.params.id)
-
-  if (user) {
-    await user.remove()
-    res.json({ message: 'Usuario eliminado' })
-  } else {
-    res.status(404).json({ message: 'Usuario no encontrado' })
+  try {
+    const user = await User.findByIdAndDelete(req.params.id)
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+    res.json({ message: 'Usuario eliminado correctamente' })
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar el usuario' })
   }
 }
 

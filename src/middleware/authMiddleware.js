@@ -15,8 +15,7 @@ const protect = async (req, res, next) => {
     } catch (error) {
       return res.status(401).json({ message: 'No autorizado, token inválido' })
     }
-  }
-  if (!token) {
+  } else {
     return res.status(401).json({ message: 'No autorizado, no hay token' })
   }
 }
