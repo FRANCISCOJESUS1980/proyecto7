@@ -4,7 +4,9 @@ const commentSchema = new mongoose.Schema(
   {
     content: {
       type: String,
-      required: true
+      required: [true, 'El contenido del comentario es obligatorio'],
+      trim: true,
+      maxlength: [500, 'El comentario no puede exceder los 500 caracteres']
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,6 +21,9 @@ const commentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
+
+commentSchema.index({ user: 1 })
+commentSchema.index({ post: 1 })
 
 const Comment = mongoose.model('Comment', commentSchema)
 
